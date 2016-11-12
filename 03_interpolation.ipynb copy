@@ -1,0 +1,311 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "%matplotlib inline\n",
+    "import numpy\n",
+    "import matplotlib.pyplot as plt"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Group Work 3 - Interpolation\n",
+    "\n",
+    "\n",
+    "Additional resource: http://www.math.niu.edu/~dattab/MATH435.2013/INTERPOLATION"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "**(a)** Based on the principals of an interpolating polynomial, write the general system of equations for an interpolating polynomial $P_N(x)$ of degree $N$ that goes through $N+1$ points represent. Express this in matrix notation."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "What are the inputs to the problem we are solving? \n",
+    "1. $n+1$ distinct points $x_0, x_1, ..., x_N$\n",
+    "2. $n+1$ functional values $y_0, y_1, ..., y_N$\n",
+    "\n",
+    "Property of interpolating polynomial: \n",
+    "$\\Rightarrow P_n(x_0) = y_0 \\dots P_n(x_N) = y_N$ \n",
+    "\n",
+    "We know that an interpolating polynoial of degree n is of the form: \n",
+    "$P_n(x) = a_0 + a_1x + ... + a_N x^N $\n",
+    "\n",
+    "With this, and the previous information we can make $n+1$ equations:\n",
+    "$$P_n(x_0) = a_0 + a_1x_0 + ... + a_N x_0^N = y_0$$\n",
+    "$$\\vdots$$\n",
+    "$$P_n(x_n) = a_0 + a_1x_n + ... + a_N x_n^N = y_n$$\n",
+    "\n",
+    "This can be represented as a linear system: $Ax = b$\n",
+    "\n",
+    "Clearly, our unknowns are the coefficients, which are weights of the monomial basis.\n",
+    "\n",
+    "$$Ax = \n",
+    "\\begin{bmatrix} \n",
+    "    1      & x_0    & x_0^2  & \\cdots & x_0^N  \\\\\n",
+    "    1      & x_1    & x_1^2  & \\cdots & x_1^N  \\\\\n",
+    "    \\vdots & \\vdots & \\vdots & \\ddots & \\vdots \\\\\n",
+    "    1      & x_m    & x_m^2  & \\cdots & x_m^N  \\\\\n",
+    "\\end{bmatrix} \\begin{bmatrix}\n",
+    "a_0 \\\\\n",
+    "a_1 \\\\\n",
+    "\\vdots \\\\\n",
+    "a_N\n",
+    "\\end{bmatrix} = \\begin{bmatrix} y_0 \\\\ y_1 \\\\ \\vdots \\\\ y_N \\end{bmatrix} $$\n",
+    "\n",
+    "Note, once the coefficients are determined, we multiply the coefficients by the monomial basis because the represent the respective weights for each element in the basis and the result is the interpolating polynomial!"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "**(b)** What does the system of equations look like if you use the Lagrangian basis?  Can you represent this in matrix form?  Think about the basis and its role in the previous question. (Hint: start from the definition of an interpolating polynomial and what it must satisfy. )"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Interpolating polynomial with lagrangian basis: \n",
+    "$$P_n(x) = \\sum_{i=0}^{n} a_i \\ell_i(x) $$\n",
+    "System of equations: \n",
+    "\n",
+    "$$P_n(x_0) = a_0 \\ell_0(x_0) + \\dots + a_n \\ell_n(x_0) = y_0$$\n",
+    "$$ \\vdots $$\n",
+    "$$P_n(x_n) = a_0 \\ell_0(x_n) + \\dots + a_n \\ell_n(x_n) = y_n$$\n",
+    "\n",
+    "Evaluate all lagrangian basis using the definition of the basis: \n",
+    "\n",
+    "Point $x_0$: \n",
+    "$$\\ell_0(x_0) = \\prod_{i=0, i \\neq{0} } \\frac{x_0 - x_i}{x_0 - x_i} = 1 $$\n",
+    "$$\\ell_1(x_0) = \\prod_{i=0, i \\neq{1} } \\frac{x_0 - x_i}{x_1 - x_i} = 0 $$\n",
+    "$$ \\vdots $$\n",
+    "$$\\ell_n(x_0) = \\prod_{i=0, i \\neq{1} } \\frac{x_0 - x_i}{x_n - x_i} = 0 $$\n",
+    "\n",
+    "Point $x_1$: \n",
+    "$$\\ell_0(x_1) = \\prod_{i=0, i \\neq{0} } \\frac{x_1 - x_i}{x_0 - x_i} = 1 $$\n",
+    "$$\\ell_1(x_1) = \\prod_{i=0, i \\neq{1} } \\frac{x_1 - x_i}{x_1 - x_i} = 0 $$\n",
+    "$$ \\vdots $$\n",
+    "$$\\ell_n(x_1) = \\prod_{i=0, i \\neq{1} } \\frac{x_1 - x_i}{x_n - x_i} = 0 $$\n",
+    "\n",
+    "In this way, we see that combining all these equations $(n+1)^2$ of them into a matrix we get: \n",
+    "\n",
+    "$$\\begin{bmatrix}\n",
+    "1 & 0 & \\dots & 0 \\\\\n",
+    "0 & 1 & \\dots & 0 \\\\ \n",
+    "\\vdots & 0 & \\ddots & 0 \\\\\n",
+    "0 & 0 & \\dots & 1 \n",
+    "\\end{bmatrix} \\begin{bmatrix}\n",
+    "a_0 \\\\\n",
+    "a_1 \\\\\n",
+    "\\vdots \\\\\n",
+    "a_N\n",
+    "\\end{bmatrix} = \\begin{bmatrix} \n",
+    "y_0 \\\\\n",
+    "y_1 \\\\\n",
+    "\\vdots \\\\\n",
+    "y_n \n",
+    "\\end{bmatrix} $$\n",
+    "\n",
+    "Or $Ix = y$\n",
+    "\n",
+    "The interpolating polynomial can then be represented as: \n",
+    "$P_n(x) = \\sum_{i=0}^n y_i \\ell_i(x) $"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "**(c)** Are the systems you just derived related?  What conclusion can you draw based on these two examples about the form of the linear system to find the coefficients?"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The systems are basis dependent."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "**(c)** Generate $N+1$ random points (take $N+1$ as user input), and construct the interpolating polynomial using a monomial basis.  For this exercise assume $x \\in [-\\pi, \\pi]$."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [],
+   "source": [
+    "# Pick out random points\n",
+    "num_points = 6\n",
+    "data = numpy.empty((num_points, 2))\n",
+    "data[:, 0] = numpy.random.random(num_points) * 2.0 * numpy.pi - numpy.pi\n",
+    "data[:, 1] = numpy.random.random(num_points)\n",
+    "\n",
+    "N = num_points - 1\n",
+    "    \n",
+    "#1: Form Vandermonde matrix and b vector\n",
+    "A = numpy.ones((num_points, num_points))\n",
+    "b = numpy.ones((num_points, 1))\n",
+    "A_prime = numpy.vander(data[:, 0], N = None, increasing = True)\n",
+    "\n",
+    "#2 solve system\n",
+    "coefficients = numpy.linalg.solve(A_prime, data[:, 1])        \n",
+    "\n",
+    "#3 construct interpolating polynomial \n",
+    "x = numpy.linspace(-numpy.pi, numpy.pi, 100)\n",
+    "P = numpy.zeros(x.shape[0])\n",
+    "\n",
+    "# first, create the monomial basis \n",
+    "monomial_basis = numpy.ones((num_points, x.shape[0]))\n",
+    "for i in xrange(num_points):\n",
+    "    monomial_basis[i, :] = x**i\n",
+    "\n",
+    "for n in range(num_points):\n",
+    "    P += monomial_basis[n, :] * coefficients[n]\n",
+    "\n",
+    "# Plot individual basis\n",
+    "fig = plt.figure()\n",
+    "axes = fig.add_subplot(1, 1, 1)\n",
+    "for i in xrange(num_points):\n",
+    "    axes.plot(x, monomial_basis[i, :], label=\"$x^%s$\" % i)\n",
+    "    axes.plot(data[i, 0], data[i, 1], 'ko', label = \"Data\")\n",
+    "    \n",
+    "# Plot interpolating polynomial \n",
+    "fig = plt.figure()\n",
+    "axes = fig.add_subplot(1, 1, 1)\n",
+    "axes.plot(x, P, label=\"$P_{%s}(x)$\" % N)\n",
+    "axes.set_xlabel(\"$x$\")\n",
+    "axes.set_ylabel(\"$P_{N}(x)$\")\n",
+    "axes.set_title(\"$P_{N}(x)$\")\n",
+    "axes.set_xlim((-numpy.pi, numpy.pi))\n",
+    "\n",
+    "# Plot data points\n",
+    "for point in data:\n",
+    "    axes.plot(point[0], point[1], 'ko', label = \"Data\")\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "**(d)** Do the same as before except use a Lagrangian basis."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [],
+   "source": [
+    "# Pick out random points\n",
+    "num_points = 10\n",
+    "data = numpy.empty((num_points, 2))\n",
+    "data[:, 0] = numpy.random.random(num_points) * 2.0 * numpy.pi - numpy.pi\n",
+    "print data[:, 0]\n",
+    "data[:, 1] = numpy.random.random(num_points)\n",
+    "\n",
+    "N = num_points - 1\n",
+    "x = numpy.linspace(-numpy.pi, numpy.pi, 100)\n",
+    "\n",
+    "# Step 1: Generate Lagrangian Basis\n",
+    "# Note, we have N+1 weights y_0 ... y_N so we have N+1 basis functions \n",
+    "# --> row size is then numPts & column size is the size of the vector x we are transforming\n",
+    "lagrangian_basis = numpy.ones((num_points, x.shape[0]))\n",
+    "for i in range(num_points):\n",
+    "    for j in range(num_points):\n",
+    "        if i != j: \n",
+    "            lagrangian_basis[i, :] *= (x - data[j][0]) / (data[i][0] - data[j][0])\n",
+    "\n",
+    "# Step 2: Calculate Full Polynomial\n",
+    "P = numpy.zeros(x.shape[0])\n",
+    "for i in range(numPts):\n",
+    "    P += lagrangian_basis[i, :] * data[i][1]\n",
+    "\n",
+    "# Plot individual basis\n",
+    "fig = plt.figure()\n",
+    "axes = fig.add_subplot(1, 1, 1)\n",
+    "for i in xrange(num_points):\n",
+    "    axes.plot(x, lagrangian_basis[i, :], label=\"$\\ell_{%s}(x)$\" % i)\n",
+    "    axes.plot(data[i, 0], data[i, 1], 'ko', label = \"Data\")\n",
+    "    \n",
+    "# Plot polynomial   \n",
+    "fig = plt.figure()\n",
+    "axes = fig.add_subplot(1, 1, 1)\n",
+    "axes.plot(x, P, label=\"$P_{%s}(x)$\" % degree)\n",
+    "axes.set_xlabel(\"$x$\")\n",
+    "axes.set_ylabel(\"$P_{N}(x)$\")\n",
+    "axes.set_title(\"$P_{N}(x)$\")\n",
+    "for point in data:\n",
+    "    axes.plot(point[0], point[1], 'ko', label = \"Data\")\n",
+    "    \n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "**(e)** What do you observe about the basis when we leave the interval $[-\\pi, pi]$?"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "They diverge quickly."
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 2",
+   "language": "python",
+   "name": "python2"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 2
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython2",
+   "version": "2.7.12"
+  },
+  "latex_envs": {
+   "bibliofile": "biblio.bib",
+   "cite_by": "apalike",
+   "current_citInitial": 1,
+   "eqLabelWithNumbers": true,
+   "eqNumInitial": 0
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 0
+}
